@@ -12,7 +12,7 @@ class RemoteImageTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(22),
       child: SizedBox(
         height: height,
         width: double.infinity,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/app_theme.dart';
@@ -85,7 +86,7 @@ class _BerandaScreenState extends State<BerandaScreen> {
                     height: 34,
                     decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(8)),
                     alignment: Alignment.center,
-                    child: const Text('V', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+                    child: const Text('V', style: TextStyle(color: AppColors.onPrimary, fontWeight: FontWeight.w800)),
                   ),
                   const SizedBox(width: 8),
                   const Column(
@@ -114,7 +115,7 @@ class _BerandaScreenState extends State<BerandaScreen> {
                           constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
                           decoration: const BoxDecoration(color: AppColors.danger, shape: BoxShape.circle),
                           alignment: Alignment.center,
-                          child: Text('${notificationProvider.unreadCount}', style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w700)),
+                          child: Text('${notificationProvider.unreadCount}', style: const TextStyle(color: AppColors.onPrimary, fontSize: 9, fontWeight: FontWeight.w700)),
                         ),
                       ),
                   ],
@@ -125,10 +126,10 @@ class _BerandaScreenState extends State<BerandaScreen> {
                     onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AkunScreen())),
                     child: CircleAvatar(
                       radius: 16,
-                      backgroundColor: AppColors.info,
+                      backgroundColor: AppColors.primary,
                       child: Text(
                         (admin?.name.isNotEmpty == true ? admin!.name[0] : 'A').toUpperCase(),
-                        style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700),
+                        style: const TextStyle(color: AppColors.onPrimary, fontSize: 13, fontWeight: FontWeight.w700),
                       ),
                     ),
                   ),
@@ -202,7 +203,7 @@ class _ErrorNotice extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: AppColors.warningBg, borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(color: AppColors.warningBg, borderRadius: BorderRadius.circular(22)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -229,32 +230,42 @@ class _WelcomeBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       clipBehavior: Clip.hardEdge,
-      decoration: BoxDecoration(gradient: const LinearGradient(colors: [AppColors.primary, AppColors.primaryDark]), borderRadius: BorderRadius.circular(18)),
+      decoration: BoxDecoration(
+        gradient: AppColors.maroonGradient,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: AppColors.border),
+        boxShadow: [BoxShadow(color: AppColors.maroon.withValues(alpha: 0.45), blurRadius: 24, offset: const Offset(0, 10))],
+      ),
       child: Stack(
         children: [
           Positioned(
-            right: -30,
-            top: -30,
-            child: Container(width: 120, height: 120, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.06), shape: BoxShape.circle)),
+            right: -40,
+            top: -40,
+            child: Container(
+              width: 140,
+              height: 140,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.primary.withValues(alpha: 0.08)),
+            ),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(8)),
+                decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.14), borderRadius: BorderRadius.circular(20)),
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  const Icon(Icons.calendar_today, size: 12, color: Colors.white),
+                  const Icon(Icons.calendar_today, size: 12, color: AppColors.primary),
                   const SizedBox(width: 6),
-                  Text(Formatters.dayDate(DateTime.now()), style: const TextStyle(color: Colors.white, fontSize: 11)),
+                  Text(Formatters.dayDate(DateTime.now()), style: const TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.w600)),
                 ]),
               ),
-              const SizedBox(height: 12),
-              Text('Selamat Datang, $adminName', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800)),
-              const SizedBox(height: 4),
-              const Text('Pantau konveksi seragam & rental kostum hari ini.', style: TextStyle(color: Colors.white70, fontSize: 12)),
+              const SizedBox(height: 14),
+              Text('Selamat Datang,', style: GoogleFonts.greatVibes(fontSize: 26, color: AppColors.primary)),
+              Text(adminName, style: GoogleFonts.playfairDisplay(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+              const SizedBox(height: 6),
+              const Text('Pantau konveksi seragam & rental kostum hari ini.', style: TextStyle(color: AppColors.textSecondary, fontSize: 12.5)),
             ],
           ),
         ],
@@ -280,7 +291,7 @@ class _RingkasanGrid extends StatelessWidget {
         Expanded(
           child: Container(
             padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.border)),
+            decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(22), border: Border.all(color: AppColors.border)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -328,7 +339,7 @@ class _StatCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.border)),
+      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(22), border: Border.all(color: AppColors.border)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -415,7 +426,7 @@ class _KelolaTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
           color: highlighted ? AppColors.primary : AppColors.surface,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(20),
           border: highlighted ? null : Border.all(color: AppColors.border),
         ),
         child: Column(
@@ -424,7 +435,7 @@ class _KelolaTile extends StatelessWidget {
             Stack(
               clipBehavior: Clip.none,
               children: [
-                Icon(icon, color: highlighted ? Colors.white : AppColors.primary, size: 24),
+                Icon(icon, color: highlighted ? AppColors.onPrimary : AppColors.primary, size: 24),
                 if (badge != null)
                   Positioned(
                     right: -6,
@@ -432,13 +443,13 @@ class _KelolaTile extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                       decoration: const BoxDecoration(color: AppColors.danger, shape: BoxShape.circle),
-                      child: Text(badge!, style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w700)),
+                      child: Text(badge!, style: const TextStyle(color: AppColors.onPrimary, fontSize: 9, fontWeight: FontWeight.w700)),
                     ),
                   ),
               ],
             ),
             const SizedBox(height: 8),
-            Text(title, textAlign: TextAlign.center, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: highlighted ? Colors.white : AppColors.textPrimary)),
+            Text(title, textAlign: TextAlign.center, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: highlighted ? AppColors.onPrimary : AppColors.textPrimary)),
           ],
         ),
       ),
@@ -461,7 +472,7 @@ class _JadwalTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.border)),
+      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.border)),
       child: Row(
         children: [
           Icon(isPickupToday ? Icons.outbound : Icons.assignment_return_outlined, size: 18, color: AppColors.info),

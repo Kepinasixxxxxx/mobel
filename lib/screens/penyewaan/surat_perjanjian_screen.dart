@@ -58,7 +58,7 @@ class _SuratPerjanjianScreenState extends State<SuratPerjanjianScreen> {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: AppColors.surface,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(22),
               border: Border.all(color: AppColors.border),
               boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 12, offset: const Offset(0, 4))],
             ),
@@ -72,7 +72,7 @@ class _SuratPerjanjianScreenState extends State<SuratPerjanjianScreen> {
                       height: 44,
                       decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(10)),
                       alignment: Alignment.center,
-                      child: const Text('V', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 20)),
+                      child: const Text('V', style: TextStyle(color: AppColors.onPrimary, fontWeight: FontWeight.w800, fontSize: 20)),
                     ),
                     const SizedBox(height: 8),
                     const Text('VIEGUARD Kostum & Drumband', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13), textAlign: TextAlign.center),
@@ -165,7 +165,7 @@ class _SuratPerjanjianScreenState extends State<SuratPerjanjianScreen> {
             child: ElevatedButton.icon(
               onPressed: _downloading ? null : _downloadAndOpen,
               icon: _downloading
-                  ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.onPrimary))
                   : const Icon(Icons.picture_as_pdf_outlined, size: 18),
               label: Text(_downloading ? 'Mengunduh...' : 'Cetak / Simpan PDF'),
             ),

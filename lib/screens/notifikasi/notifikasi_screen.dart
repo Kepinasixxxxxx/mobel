@@ -106,7 +106,7 @@ class _NotificationCard extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: notification.isRead ? AppColors.surface : AppColors.infoBg.withValues(alpha: 0.4),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(color: AppColors.border),
         ),
         child: Row(
@@ -156,7 +156,7 @@ class _FilterChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
         decoration: BoxDecoration(color: selected ? AppColors.primary : AppColors.surface, borderRadius: BorderRadius.circular(20), border: Border.all(color: selected ? AppColors.primary : AppColors.border)),
-        child: Text(label, style: TextStyle(color: selected ? Colors.white : AppColors.textSecondary, fontSize: 11.5, fontWeight: FontWeight.w600)),
+        child: Text(label, style: TextStyle(color: selected ? AppColors.onPrimary : AppColors.textSecondary, fontSize: 11.5, fontWeight: FontWeight.w600)),
       ),
     );
   }

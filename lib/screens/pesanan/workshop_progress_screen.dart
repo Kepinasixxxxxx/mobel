@@ -80,7 +80,7 @@ class _WorkshopProgressScreenState extends State<WorkshopProgressScreen> {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.border)),
+            decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(22), border: Border.all(color: AppColors.border)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -182,7 +182,7 @@ class _WorkshopProgressScreenState extends State<WorkshopProgressScreen> {
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: _submitting ? null : _submit,
-              icon: _submitting ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Icon(Icons.cloud_upload_outlined, size: 18),
+              icon: _submitting ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.onPrimary)) : const Icon(Icons.cloud_upload_outlined, size: 18),
               label: const Text('Simpan & Publikasikan Progres'),
             ),
           ),
@@ -217,8 +217,8 @@ class _PhaseTile extends StatelessWidget {
                 decoration: BoxDecoration(color: done ? AppColors.success : (active ? AppColors.info : AppColors.border), shape: BoxShape.circle),
                 alignment: Alignment.center,
                 child: done
-                    ? const Icon(Icons.check, color: Colors.white, size: 16)
-                    : Text('${index + 1}', style: TextStyle(color: active ? Colors.white : AppColors.textSecondary, fontWeight: FontWeight.w700, fontSize: 12)),
+                    ? const Icon(Icons.check, color: AppColors.onPrimary, size: 16)
+                    : Text('${index + 1}', style: TextStyle(color: active ? AppColors.onPrimary : AppColors.textSecondary, fontWeight: FontWeight.w700, fontSize: 12)),
               ),
               if (index < kWorkshopPhases.length - 1) Expanded(child: Container(width: 2, color: AppColors.border)),
             ]),
@@ -229,7 +229,7 @@ class _PhaseTile extends StatelessWidget {
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.border)),
+                  decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(22), border: Border.all(color: AppColors.border)),
                   child: Row(children: [
                     Expanded(child: Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5))),
                     TagChip(

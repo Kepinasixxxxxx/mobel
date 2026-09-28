@@ -49,6 +49,7 @@ class VieguardApp extends StatelessWidget {
         title: 'VIEGUARD',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
+        scrollBehavior: const AppScrollBehavior(),
         home: const _AuthGate(),
       ),
     );

@@ -86,12 +86,12 @@ class AkunScreen extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.border)),
+            decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(22), border: Border.all(color: AppColors.border)),
             child: Row(children: [
               CircleAvatar(
                 radius: 28,
-                backgroundColor: AppColors.info,
-                child: Text((admin?.name.isNotEmpty == true ? admin!.name[0] : 'A').toUpperCase(), style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700)),
+                backgroundColor: AppColors.primary,
+                child: Text((admin?.name.isNotEmpty == true ? admin!.name[0] : 'A').toUpperCase(), style: const TextStyle(color: AppColors.onPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -161,7 +161,7 @@ class _MenuTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.border)),
+      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(22), border: Border.all(color: AppColors.border)),
       child: ListTile(
         onTap: onTap,
         leading: Container(

@@ -89,10 +89,10 @@ class _DateRangePickerSheetState extends State<_DateRangePickerSheet> {
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                decoration: BoxDecoration(color: AppColors.infoBg, borderRadius: BorderRadius.circular(10)),
+                decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.16), borderRadius: BorderRadius.circular(10)),
                 child: Text(
                   _start == null ? 'Pilih tanggal mulai' : (_end == null ? '${Formatters.date(_start!)} - pilih tanggal akhir' : '${Formatters.date(_start!)}  -  ${Formatters.date(_end!)}'),
-                  style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.info),
+                  style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.primary),
                 ),
               ),
               const SizedBox(height: 12),
@@ -153,12 +153,12 @@ class _DateRangePickerSheetState extends State<_DateRangePickerSheet> {
                     child: Container(
                       margin: const EdgeInsets.symmetric(vertical: 2),
                       decoration: BoxDecoration(
-                        color: isStart || isEnd ? AppColors.primary : (inRange ? AppColors.infoBg : null),
+                        color: isStart || isEnd ? AppColors.primary : (inRange ? AppColors.primary.withValues(alpha: 0.16) : null),
                         shape: isStart || isEnd ? BoxShape.circle : BoxShape.rectangle,
                         borderRadius: isStart || isEnd ? null : BorderRadius.circular(8),
                       ),
                       alignment: Alignment.center,
-                      child: Text('${day.day}', style: TextStyle(fontSize: 12.5, color: isStart || isEnd ? Colors.white : AppColors.textPrimary, fontWeight: isStart || isEnd ? FontWeight.w700 : FontWeight.w400)),
+                      child: Text('${day.day}', style: TextStyle(fontSize: 12.5, color: isStart || isEnd ? AppColors.onPrimary : AppColors.textPrimary, fontWeight: isStart || isEnd ? FontWeight.w700 : FontWeight.w400)),
                     ),
                   );
                 },

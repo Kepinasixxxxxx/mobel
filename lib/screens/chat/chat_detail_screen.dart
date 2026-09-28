@@ -108,7 +108,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
               const SizedBox(width: 8),
               CircleAvatar(
                 backgroundColor: AppColors.primary,
-                child: IconButton(icon: const Icon(Icons.send, color: Colors.white, size: 18), onPressed: _send),
+                child: IconButton(icon: const Icon(Icons.send, color: AppColors.onPrimary, size: 18), onPressed: _send),
               ),
             ]),
           ),
@@ -133,7 +133,7 @@ class _MessageBubble extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: isAdmin ? AppColors.primary : AppColors.surface,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(20),
           border: isAdmin ? null : Border.all(color: AppColors.border),
         ),
         child: Column(
@@ -145,11 +145,11 @@ class _MessageBubble extends StatelessWidget {
                 child: Image.network('${ApiConfig.origin}${message.imageAttachment}', width: 180, fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) => const SizedBox.shrink()),
               ),
             if (message.messageText != null && message.messageText!.isNotEmpty)
-              Text(message.messageText!, style: TextStyle(color: isAdmin ? Colors.white : AppColors.textPrimary, fontSize: 13)),
+              Text(message.messageText!, style: TextStyle(color: isAdmin ? AppColors.onPrimary : AppColors.textPrimary, fontSize: 13)),
             const SizedBox(height: 4),
             Text(
               '${message.createdAt.hour.toString().padLeft(2, '0')}:${message.createdAt.minute.toString().padLeft(2, '0')} WIB',
-              style: TextStyle(color: isAdmin ? Colors.white70 : AppColors.textSecondary, fontSize: 10),
+              style: TextStyle(color: isAdmin ? AppColors.onPrimaryMuted : AppColors.textSecondary, fontSize: 10),
             ),
           ],
         ),

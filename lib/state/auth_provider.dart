@@ -57,6 +57,28 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> requestPasswordReset(String email) async {
+    errorMessage = null;
+    try {
+      await apiClient.post('/auth/forgot-password', data: {'email': email});
+      return true;
+    } on ApiException catch (e) {
+      errorMessage = e.message;
+      return false;
+    }
+  }
+
+  Future<bool> resetPassword({required String email, required String otpCode, required String newPassword}) async {
+    errorMessage = null;
+    try {
+      await apiClient.post('/auth/reset-password', data: {'email': email, 'otpCode': otpCode, 'newPassword': newPassword});
+      return true;
+    } on ApiException catch (e) {
+      errorMessage = e.message;
+      return false;
+    }
+  }
+
   Future<bool> updateProfile({String? name, String? phone}) async {
     try {
       final data = await apiClient.put('/account/me', data: {

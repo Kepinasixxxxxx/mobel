@@ -25,6 +25,22 @@ class TokenStorage {
     return prefs.getString(_refreshKey);
   }
 
+  static const _rememberKey = 'vg_remembered_email';
+
+  Future<void> saveRememberedEmail(String? email) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (email == null) {
+      await prefs.remove(_rememberKey);
+    } else {
+      await prefs.setString(_rememberKey, email);
+    }
+  }
+
+  Future<String?> readRememberedEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_rememberKey);
+  }
+
   Future<void> clear() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_accessKey);

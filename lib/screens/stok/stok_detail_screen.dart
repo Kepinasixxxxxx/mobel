@@ -33,13 +33,13 @@ class StokDetailScreen extends StatelessWidget {
               Positioned(
                 left: 10,
                 top: 10,
-                child: TagChip(label: product.isVisible ? 'Tampil di Katalog' : 'Tersembunyi', color: product.isVisible ? AppColors.success : AppColors.textSecondary, background: Colors.white),
+                child: TagChip(label: product.isVisible ? 'Tampil di Katalog' : 'Tersembunyi', color: product.isVisible ? AppColors.success : AppColors.textSecondary, background: AppColors.onPrimary),
               ),
               if (product.isCustomAvailable)
                 Positioned(
                   right: 10,
                   top: 10,
-                  child: const TagChip(label: 'Bisa Custom', color: AppColors.accent, background: Colors.white),
+                  child: const TagChip(label: 'Bisa Custom', color: AppColors.accent, background: AppColors.onPrimary),
                 ),
             ],
           ),
@@ -54,25 +54,25 @@ class StokDetailScreen extends StatelessWidget {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(gradient: const LinearGradient(colors: [AppColors.primary, AppColors.primaryDark]), borderRadius: BorderRadius.circular(16)),
+            decoration: BoxDecoration(gradient: const LinearGradient(colors: [AppColors.primary, AppColors.primaryDark]), borderRadius: BorderRadius.circular(22)),
             child: Row(children: [
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Total Stok Sewa', style: TextStyle(color: Colors.white70, fontSize: 11)),
-                    Text('$totalRent Stel', style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800)),
+                    const Text('Total Stok Sewa', style: TextStyle(color: AppColors.onPrimaryMuted, fontSize: 11)),
+                    Text('$totalRent Stel', style: const TextStyle(color: AppColors.onPrimary, fontSize: 22, fontWeight: FontWeight.w800)),
                   ],
                 ),
               ),
-              Container(width: 1, height: 36, color: Colors.white24),
+              Container(width: 1, height: 36, color: AppColors.onPrimaryFaint),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Total Stok Beli', style: TextStyle(color: Colors.white70, fontSize: 11)),
-                    Text('$totalBuy Stel', style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800)),
+                    const Text('Total Stok Beli', style: TextStyle(color: AppColors.onPrimaryMuted, fontSize: 11)),
+                    Text('$totalBuy Stel', style: const TextStyle(color: AppColors.onPrimary, fontSize: 22, fontWeight: FontWeight.w800)),
                   ],
                 ),
               ),

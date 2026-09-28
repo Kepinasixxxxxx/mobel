@@ -57,7 +57,7 @@ class _RentalCalendarTabState extends State<RentalCalendarTab> {
       children: [
         Container(
           padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.border)),
+          decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(22), border: Border.all(color: AppColors.border)),
           child: Column(
             children: [
               Row(children: [
@@ -91,7 +91,7 @@ class _RentalCalendarTabState extends State<RentalCalendarTab> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('${day.day}', style: TextStyle(fontSize: 12, color: selected ? Colors.white : AppColors.textPrimary, fontWeight: selected ? FontWeight.w700 : FontWeight.w400)),
+                          Text('${day.day}', style: TextStyle(fontSize: 12, color: selected ? AppColors.onPrimary : AppColors.textPrimary, fontWeight: selected ? FontWeight.w700 : FontWeight.w400)),
                           if (dayEvents.isNotEmpty)
                             Padding(
                               padding: const EdgeInsets.only(top: 2),
@@ -101,7 +101,7 @@ class _RentalCalendarTabState extends State<RentalCalendarTab> {
                                       width: 4,
                                       height: 4,
                                       margin: const EdgeInsets.symmetric(horizontal: 1),
-                                      decoration: BoxDecoration(color: t == 'ambil' ? AppColors.info : AppColors.success, shape: BoxShape.circle),
+                                      decoration: BoxDecoration(color: t == 'ambil' ? AppColors.primary : AppColors.success, shape: BoxShape.circle),
                                     )).toList(),
                               ),
                             ),
@@ -113,7 +113,7 @@ class _RentalCalendarTabState extends State<RentalCalendarTab> {
               ),
               const SizedBox(height: 8),
               const Row(children: [
-                _LegendDot(color: AppColors.info, label: 'Pengambilan'),
+                _LegendDot(color: AppColors.primary, label: 'Pengambilan'),
                 SizedBox(width: 14),
                 _LegendDot(color: AppColors.success, label: 'Pengembalian'),
               ]),
@@ -134,8 +134,8 @@ class _RentalCalendarTabState extends State<RentalCalendarTab> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: AppColors.surface,
-                borderRadius: BorderRadius.circular(12),
-                border: Border(left: BorderSide(color: isAmbil ? AppColors.info : AppColors.success, width: 4)),
+                borderRadius: BorderRadius.circular(22),
+                border: Border(left: BorderSide(color: isAmbil ? AppColors.primary : AppColors.success, width: 4)),
               ),
               child: Row(children: [
                 Expanded(
@@ -143,7 +143,7 @@ class _RentalCalendarTabState extends State<RentalCalendarTab> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(children: [
-                        TagChip(label: isAmbil ? 'AMBIL' : 'KEMBALI', color: isAmbil ? AppColors.info : AppColors.success, background: isAmbil ? AppColors.infoBg : AppColors.successBg),
+                        TagChip(label: isAmbil ? 'AMBIL' : 'KEMBALI', color: isAmbil ? AppColors.primary : AppColors.success, background: isAmbil ? AppColors.primary.withValues(alpha: 0.16) : AppColors.successBg),
                         const SizedBox(width: 6),
                         Text(o.customer.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
                       ]),

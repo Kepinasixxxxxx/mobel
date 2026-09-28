@@ -123,7 +123,7 @@ class _CatatKondisiBarangScreenState extends State<CatatKondisiBarangScreen> {
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(backgroundColor: AppColors.success),
               onPressed: _submitting ? null : _submit,
-              icon: _submitting ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Icon(Icons.check_circle_outline, size: 18),
+              icon: _submitting ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.onPrimary)) : const Icon(Icons.check_circle_outline, size: 18),
               label: const Text('Konfirmasi Pengembalian'),
             ),
           ),

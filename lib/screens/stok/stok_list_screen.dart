@@ -90,7 +90,7 @@ class _StatBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.border)),
+      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.border)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -118,7 +118,7 @@ class _CategoryChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14),
         alignment: Alignment.center,
         decoration: BoxDecoration(color: selected ? AppColors.primary : AppColors.surface, borderRadius: BorderRadius.circular(20), border: Border.all(color: selected ? AppColors.primary : AppColors.border)),
-        child: Text(label, style: TextStyle(color: selected ? Colors.white : AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w600)),
+        child: Text(label, style: TextStyle(color: selected ? AppColors.onPrimary : AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w600)),
       ),
     );
   }
@@ -138,7 +138,7 @@ class _ProductCard extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.border)),
+        decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(22), border: Border.all(color: AppColors.border)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -148,7 +148,7 @@ class _ProductCard extends StatelessWidget {
                 child: Container(
                   width: 52,
                   height: 52,
-                  color: AppColors.background,
+                  color: AppColors.surfaceHigh,
                   child: product.imageUrls.isNotEmpty
                       ? Image.network(product.imageUrls.first, fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) => const Icon(Icons.checkroom, color: AppColors.textSecondary))
                       : const Icon(Icons.checkroom, color: AppColors.textSecondary),
@@ -165,13 +165,13 @@ class _ProductCard extends StatelessWidget {
                   ],
                 ),
               ),
-              TagChip(label: ready > 0 ? '$ready Ready' : 'Kosong', color: ready > 0 ? AppColors.success : AppColors.danger, background: ready > 0 ? AppColors.successBg : AppColors.background),
+              TagChip(label: ready > 0 ? '$ready Ready' : 'Kosong', color: ready > 0 ? AppColors.success : AppColors.danger, background: ready > 0 ? AppColors.successBg : AppColors.danger.withValues(alpha: 0.16)),
             ]),
             if (product.variants.isNotEmpty) ...[
               const SizedBox(height: 10),
               Wrap(
                 spacing: 6,
-                children: product.variants.map((v) => TagChip(label: '${v.size} (${v.stockRent})', color: AppColors.textSecondary, background: AppColors.background)).toList(),
+                children: product.variants.map((v) => TagChip(label: '${v.size} (${v.stockRent})', color: AppColors.textSecondary, background: AppColors.surfaceHigh)).toList(),
               ),
             ],
           ],

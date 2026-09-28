@@ -143,34 +143,34 @@ extension OrderStatusX on OrderStatus {
   Color get color {
     switch (this) {
       case OrderStatus.pending:
-        return const Color(0xFFF59E0B);
+        return const Color(0xFFFFF4E0);
       case OrderStatus.dikonfirmasi:
-        return const Color(0xFF2563EB);
+        return const Color(0xFFFFF4E0);
       case OrderStatus.diproses:
-        return const Color(0xFF2563EB);
+        return const Color(0xFFFFF4E0);
       case OrderStatus.siapDiambil:
-        return const Color(0xFF16A34A);
+        return const Color(0xFFE9B949);
       case OrderStatus.selesai:
-        return const Color(0xFF16A34A);
+        return const Color(0xFFE9B949);
       case OrderStatus.dibatalkan:
-        return const Color(0xFFDC2626);
+        return const Color(0xFFFF6B6B);
     }
   }
 
   Color get background {
     switch (this) {
       case OrderStatus.pending:
-        return const Color(0xFFFEF3C7);
+        return const Color(0x24FFF4E0);
       case OrderStatus.dikonfirmasi:
-        return const Color(0xFFDBEAFE);
+        return const Color(0x24FFF4E0);
       case OrderStatus.diproses:
-        return const Color(0xFFDBEAFE);
+        return const Color(0x24FFF4E0);
       case OrderStatus.siapDiambil:
-        return const Color(0xFFD1FAE5);
+        return const Color(0x33E9B949);
       case OrderStatus.selesai:
-        return const Color(0xFFD1FAE5);
+        return const Color(0x33E9B949);
       case OrderStatus.dibatalkan:
-        return const Color(0xFFFEE2E2);
+        return const Color(0x29FF6B6B);
     }
   }
 }
@@ -205,26 +205,26 @@ extension RentalStatusX on RentalStatus {
   Color get color {
     switch (this) {
       case RentalStatus.dipesan:
-        return const Color(0xFF2563EB);
+        return const Color(0xFFFFF4E0);
       case RentalStatus.diambil:
-        return const Color(0xFF16A34A);
+        return const Color(0xFFE9B949);
       case RentalStatus.dikembalikan:
-        return const Color(0xFF6B7280);
+        return const Color(0xFFC99A8F);
       case RentalStatus.terlambat:
-        return const Color(0xFFDC2626);
+        return const Color(0xFFFF6B6B);
     }
   }
 
   Color get background {
     switch (this) {
       case RentalStatus.dipesan:
-        return const Color(0xFFDBEAFE);
+        return const Color(0x24FFF4E0);
       case RentalStatus.diambil:
-        return const Color(0xFFD1FAE5);
+        return const Color(0x33E9B949);
       case RentalStatus.dikembalikan:
-        return const Color(0xFFF3F4F8);
+        return const Color(0x29C99A8F);
       case RentalStatus.terlambat:
-        return const Color(0xFFFEE2E2);
+        return const Color(0x29FF6B6B);
     }
   }
 }
@@ -244,22 +244,22 @@ extension PaymentStatusX on PaymentStatus {
   Color get color {
     switch (this) {
       case PaymentStatus.menunggu:
-        return const Color(0xFFF59E0B);
+        return const Color(0xFFFFF4E0);
       case PaymentStatus.terverifikasi:
-        return const Color(0xFF16A34A);
+        return const Color(0xFFE9B949);
       case PaymentStatus.ditolak:
-        return const Color(0xFFDC2626);
+        return const Color(0xFFFF6B6B);
     }
   }
 
   Color get background {
     switch (this) {
       case PaymentStatus.menunggu:
-        return const Color(0xFFFEF3C7);
+        return const Color(0x24FFF4E0);
       case PaymentStatus.terverifikasi:
-        return const Color(0xFFD1FAE5);
+        return const Color(0x33E9B949);
       case PaymentStatus.ditolak:
-        return const Color(0xFFFEE2E2);
+        return const Color(0x29FF6B6B);
     }
   }
 }
