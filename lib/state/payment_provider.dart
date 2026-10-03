@@ -34,11 +34,12 @@ class PaymentProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> verifyPayment(String id, {required bool approve, String? refundReason}) async {
+  Future<bool> verifyPayment(String id, {required bool approve, String? refundReason, String? pin}) async {
     try {
       await apiClient.patch('/payments/$id/verify', data: {
         'status': approve ? 'terverifikasi' : 'ditolak',
         if (!approve && refundReason != null) 'refundReason': refundReason,
+        'pin': ?pin,
       });
       await fetchPayments();
       return true;

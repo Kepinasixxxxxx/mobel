@@ -7,6 +7,7 @@ import 'core/storage/token_storage.dart';
 import 'core/theme/app_theme.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/shell/main_shell.dart';
+import 'state/appointment_provider.dart';
 import 'state/auth_provider.dart';
 import 'state/chat_provider.dart';
 import 'state/notification_provider.dart';
@@ -44,6 +45,7 @@ class VieguardApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ChatProvider(apiClient: apiClient, tokenStorage: tokenStorage)),
         ChangeNotifierProvider(create: (_) => ReportProvider(apiClient: apiClient)),
         ChangeNotifierProvider(create: (_) => NotificationProvider(apiClient: apiClient)),
+        ChangeNotifierProvider(create: (_) => AppointmentProvider(apiClient: apiClient)),
       ],
       child: MaterialApp(
         title: 'VIEGUARD',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../widgets/common/tap_scale.dart';
 import '../akun/akun_screen.dart';
 import '../beranda/beranda_screen.dart';
 import '../chat/chat_list_screen.dart';
@@ -17,7 +18,7 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _index = 0;
 
-  final _screens = const [
+  static const _screens = [
     BerandaScreen(),
     PesananListScreen(),
     PenyewaanListScreen(),
@@ -25,33 +26,54 @@ class _MainShellState extends State<MainShell> {
     AkunScreen(),
   ];
 
+  static const _items = [
+    (Icons.grid_view_rounded, 'Beranda'),
+    (Icons.receipt_long_rounded, 'Pesanan'),
+    (Icons.vpn_key_outlined, 'Penyewaan'),
+    (Icons.chat_bubble_outline_rounded, 'Chat'),
+    (Icons.person_outline_rounded, 'Akun'),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: IndexedStack(index: _index, children: _screens),
-      bottomNavigationBar: NavigationBarTheme(
-        data: NavigationBarThemeData(
-          labelTextStyle: WidgetStateProperty.resolveWith((states) {
-            final selected = states.contains(WidgetState.selected);
-            return TextStyle(
-              fontSize: 11,
-              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-              color: selected ? AppColors.primary : AppColors.textSecondary,
-            );
-          }),
-        ),
-        child: NavigationBar(
-          selectedIndex: _index,
-          onDestinationSelected: (i) => setState(() => _index = i),
-          backgroundColor: AppColors.surface,
-          indicatorColor: AppColors.primary.withValues(alpha: 0.1),
-          destinations: const [
-            NavigationDestination(icon: Icon(Icons.grid_view_outlined), selectedIcon: Icon(Icons.grid_view, color: AppColors.primary), label: 'Beranda'),
-            NavigationDestination(icon: Icon(Icons.receipt_long_outlined), selectedIcon: Icon(Icons.receipt_long, color: AppColors.primary), label: 'Pesanan'),
-            NavigationDestination(icon: Icon(Icons.key_outlined), selectedIcon: Icon(Icons.key, color: AppColors.primary), label: 'Penyewaan'),
-            NavigationDestination(icon: Icon(Icons.chat_bubble_outline), selectedIcon: Icon(Icons.chat_bubble, color: AppColors.primary), label: 'Chat'),
-            NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person, color: AppColors.primary), label: 'Akun'),
-          ],
+      bottomNavigationBar: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+        child: Container(
+          height: 68,
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppColors.goldLight, width: 1.2),
+            boxShadow: [BoxShadow(color: const Color(0xFF7A4A20).withValues(alpha: 0.12), blurRadius: 20, offset: const Offset(0, 6))],
+          ),
+          child: Row(
+            children: List.generate(_items.length, (i) {
+              final selected = i == _index;
+              final (icon, label) = _items[i];
+              return Expanded(
+                child: TapScale(
+                  onTap: () => setState(() => _index = i),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 220),
+                    curve: Curves.easeOutCubic,
+                    margin: const EdgeInsets.symmetric(horizontal: 2),
+                    decoration: BoxDecoration(color: selected ? AppColors.primary : Colors.transparent, borderRadius: BorderRadius.circular(18)),
+                    child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                      Icon(icon, size: 22, color: selected ? AppColors.goldLight : AppColors.primary),
+                      const SizedBox(height: 3),
+                      FittedBox(
+                        child: Text(label, style: TextStyle(fontSize: 11, fontWeight: selected ? FontWeight.w700 : FontWeight.w500, color: selected ? AppColors.onPrimary : AppColors.primary)),
+                      ),
+                    ]),
+                  ),
+                ),
+              );
+            }),
+          ),
         ),
       ),
     );

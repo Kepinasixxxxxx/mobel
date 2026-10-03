@@ -15,23 +15,29 @@ class OrderTypeCount {
 class ReportSummary {
   final int totalOrders;
   final int completedOrders;
+  final int pendingOrders;
   final int totalCustomers;
   final double totalRevenue;
+  final Map<String, double> revenueByType;
   final List<OrderTypeCount> ordersByType;
 
   ReportSummary({
     required this.totalOrders,
     required this.completedOrders,
+    required this.pendingOrders,
     required this.totalCustomers,
     required this.totalRevenue,
+    required this.revenueByType,
     required this.ordersByType,
   });
 
   factory ReportSummary.fromJson(Map<String, dynamic> json) => ReportSummary(
         totalOrders: json['totalOrders'] as int? ?? 0,
         completedOrders: json['completedOrders'] as int? ?? 0,
+        pendingOrders: json['pendingOrders'] as int? ?? 0,
         totalCustomers: json['totalCustomers'] as int? ?? 0,
         totalRevenue: parseDecimal(json['totalRevenue']),
+        revenueByType: (json['revenueByType'] as Map<String, dynamic>? ?? {}).map((k, v) => MapEntry(k, parseDecimal(v))),
         ordersByType: (json['ordersByType'] as List<dynamic>? ?? []).map((e) => OrderTypeCount.fromJson(e as Map<String, dynamic>)).toList(),
       );
 }

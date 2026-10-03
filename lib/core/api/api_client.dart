@@ -67,6 +67,18 @@ class ApiClient {
 
   Future<dynamic> put(String path, {Map<String, dynamic>? data}) => _unwrap(_dio.put(path, data: data));
 
+  Future<dynamic> delete(String path) => _unwrap(_dio.delete(path));
+
+  Future<dynamic> postForm(String path, FormData form) => _unwrap(_dio.post(path, data: form));
+
+  Future<dynamic> patchForm(String path, FormData form) => _unwrap(_dio.patch(path, data: form));
+
+  static MultipartFile imageFile(List<int> bytes, String filename) {
+    final ext = filename.split('.').last.toLowerCase();
+    final type = ext == 'png' ? 'png' : (ext == 'webp' ? 'webp' : 'jpeg');
+    return MultipartFile.fromBytes(bytes, filename: filename, contentType: DioMediaType('image', type));
+  }
+
   Future<List<int>> downloadBytes(String path) async {
     try {
       final response = await _dio.get<List<int>>(path, options: Options(responseType: ResponseType.bytes));

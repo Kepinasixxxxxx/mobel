@@ -5,6 +5,8 @@ class Conversation {
   final String? customerPhoto;
   final String? lastMessageText;
   final DateTime? lastMessageAt;
+  final int unreadCount;
+  final bool lastFromAdmin;
 
   Conversation({
     required this.id,
@@ -13,6 +15,8 @@ class Conversation {
     this.customerPhoto,
     this.lastMessageText,
     this.lastMessageAt,
+    this.unreadCount = 0,
+    this.lastFromAdmin = false,
   });
 
   factory Conversation.fromJson(Map<String, dynamic> json) {
@@ -26,6 +30,8 @@ class Conversation {
       customerPhoto: user?['profilePhoto'] as String?,
       lastMessageText: lastMessage?['messageText'] as String?,
       lastMessageAt: json['lastMessageAt'] != null ? DateTime.tryParse(json['lastMessageAt'].toString()) : null,
+      unreadCount: json['unreadCount'] as int? ?? 0,
+      lastFromAdmin: lastMessage?['senderType'] == 'admin',
     );
   }
 }

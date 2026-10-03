@@ -1,4 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'package:dio/dio.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../core/api/api_client.dart';
 import '../core/api/api_exception.dart';
@@ -59,6 +61,38 @@ class ProductProvider extends ChangeNotifier {
     } finally {
       isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<Product?> createProduct(Map<String, dynamic> data, List<XFile> photos) async {
+    try {
+      final created = await apiClient.post('/products', data: data);
+      final id = (created as Map<String, dynamic>)['id'].toString();
+      if (photos.isNotEmpty) {
+        final form = FormData();
+        for (final photo in photos) {
+          form.files.add(MapEntry('productImages', ApiClient.imageFile(await photo.readAsBytes(), photo.name)));
+        }
+        await apiClient.postForm('/products/$id/images', form);
+      }
+      await fetchAll();
+      return productById(id);
+    } on ApiException catch (e) {
+      errorMessage = e.message;
+      notifyListeners();
+      return null;
+    }
+  }
+
+  Future<bool> updateVariants(String id, List<Map<String, dynamic>> variants) async {
+    try {
+      await apiClient.put('/products/$id/variants', data: {'variants': variants});
+      await fetchAll();
+      return true;
+    } on ApiException catch (e) {
+      errorMessage = e.message;
+      notifyListeners();
+      return false;
     }
   }
 }

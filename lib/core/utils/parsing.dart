@@ -13,3 +13,9 @@ DateTime? parseDateOrNull(dynamic value) {
   if (value == null) return null;
   return DateTime.tryParse(value.toString());
 }
+
+String? resolveMediaUrl(String? path, String origin) {
+  if (path == null || path.isEmpty) return null;
+  if (path.startsWith('http')) return path;
+  return path.startsWith('/') ? '$origin$path' : '$origin/$path';
+}

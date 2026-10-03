@@ -4,6 +4,7 @@ import '../core/api/api_client.dart';
 import '../core/api/api_exception.dart';
 import '../core/storage/token_storage.dart';
 import '../models/admin_model.dart';
+import '../models/operations_models.dart';
 
 enum AuthStatus { unknown, authenticated, unauthenticated }
 
@@ -122,4 +123,37 @@ class AuthProvider extends ChangeNotifier {
     status = AuthStatus.unauthenticated;
     notifyListeners();
   }
+
+  SecurityInfo? security;
+
+  Future<SecurityInfo?> fetchSecurity() async {
+    try {
+      final data = await apiClient.get('/account/security');
+      security = SecurityInfo.fromJson(data as Map<String, dynamic>);
+      notifyListeners();
+      return security;
+    } on ApiException catch (e) {
+      errorMessage = e.message;
+      notifyListeners();
+      return null;
+    }
+  }
+
+  Future<bool> _securityAction(Future<void> Function() action) async {
+    try {
+      await action();
+      await fetchSecurity();
+      return true;
+    } on ApiException catch (e) {
+      errorMessage = e.message;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> setPin({required String pin, required String password}) => _securityAction(() => apiClient.patch('/account/pin', data: {'pin': pin, 'password': password}));
+
+  Future<bool> setAutoAccept(bool value) => _securityAction(() => apiClient.patch('/account/settings', data: {'autoAcceptOrders': value}));
+
+  Future<bool> revokeSession(String id) => _securityAction(() => apiClient.delete('/account/sessions/$id'));
 }

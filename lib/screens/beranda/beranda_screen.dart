@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/app_theme.dart';
@@ -10,17 +10,15 @@ import '../../state/auth_provider.dart';
 import '../../state/notification_provider.dart';
 import '../../state/order_provider.dart';
 import '../../state/payment_provider.dart';
+import '../../state/product_provider.dart';
 import '../../state/rental_provider.dart';
-import '../../widgets/common/section_header.dart';
-import '../../widgets/common/status_badge.dart';
 import '../../widgets/common/tap_scale.dart';
-import '../../widgets/pesanan/pesanan_order_card.dart';
-import '../akun/akun_screen.dart';
-import '../notifikasi/notifikasi_screen.dart';
-import '../pembayaran/payment_verification_list_screen.dart';
+import '../../widgets/vg/vg_ui.dart';
 import '../penyewaan/penyewaan_list_screen.dart';
 import '../pesanan/detail_pesanan_screen.dart';
 import '../pesanan/pesanan_list_screen.dart';
+import '../stok/product_form_screen.dart';
+import '../stok/stok_list_screen.dart';
 
 class BerandaScreen extends StatefulWidget {
   const BerandaScreen({super.key});
@@ -30,193 +28,159 @@ class BerandaScreen extends StatefulWidget {
 }
 
 class _BerandaScreenState extends State<BerandaScreen> {
+  DateTime? _lastUpdated;
+
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
-      if (!mounted) return;
-      context.read<OrderProvider>().fetchOrders();
-      context.read<RentalProvider>().fetchRentals();
-      context.read<PaymentProvider>().fetchPayments(status: PaymentStatus.menunggu);
-      context.read<NotificationProvider>().fetchNotifications();
-    });
+    Future.microtask(_refresh);
   }
 
   Future<void> _refresh() async {
+    if (!mounted) return;
+    final products = context.read<ProductProvider>();
     await Future.wait([
       context.read<OrderProvider>().fetchOrders(),
       context.read<RentalProvider>().fetchRentals(),
       context.read<PaymentProvider>().fetchPayments(status: PaymentStatus.menunggu),
       context.read<NotificationProvider>().fetchNotifications(),
+      if (products.products.isEmpty) products.fetchAll(),
     ]);
+    if (mounted) setState(() => _lastUpdated = DateTime.now());
   }
+
+  void _push(Widget screen) => Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
 
   @override
   Widget build(BuildContext context) {
-    final orderProvider = context.watch<OrderProvider>();
-    final rentalProvider = context.watch<RentalProvider>();
-    final paymentProvider = context.watch<PaymentProvider>();
+    final orders = context.watch<OrderProvider>();
+    final rentals = context.watch<RentalProvider>();
+    final products = context.watch<ProductProvider>();
     final admin = context.watch<AuthProvider>().currentAdmin;
-    final notificationProvider = context.watch<NotificationProvider>();
 
-    final todaySchedule = rentalProvider.rentalOrders.where((o) {
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
-      final pickup = DateTime(o.rental!.pickupDate.year, o.rental!.pickupDate.month, o.rental!.pickupDate.day);
-      final ret = DateTime(o.rental!.returnDate.year, o.rental!.returnDate.month, o.rental!.returnDate.day);
-      return pickup == today || ret == today;
-    }).toList();
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    DateTime day(DateTime d) => DateTime(d.year, d.month, d.day);
+    final schedule = rentals.rentalOrders.where((o) => day(o.rental!.pickupDate) == today || day(o.rental!.returnDate) == today).toList();
+    final activeRentals = rentals.rentalOrders.where((o) => o.rental!.status == RentalStatus.diambil || o.rental!.status == RentalStatus.terlambat).toList();
+    final activeModels = activeRentals.expand((o) => o.items.map((i) => i.name)).toSet().length;
+    final rentedUnits = activeRentals.fold<int>(0, (sum, o) => sum + o.totalQuantity);
+    final bookedRentals = rentals.rentalOrders.where((o) => o.rental!.status != RentalStatus.dikembalikan).length;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: RefreshIndicator(
+        color: AppColors.primary,
         onRefresh: _refresh,
         child: CustomScrollView(
           slivers: [
             SliverAppBar(
               pinned: true,
-              backgroundColor: AppColors.surface,
+              toolbarHeight: 68,
+              backgroundColor: AppColors.background,
               surfaceTintColor: Colors.transparent,
-              elevation: 0,
+              automaticallyImplyLeading: false,
               titleSpacing: 16,
-              title: Row(
-                children: [
-                  Container(
-                    width: 34,
-                    height: 34,
-                    decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(8)),
-                    alignment: Alignment.center,
-                    child: const Text('V', style: TextStyle(color: AppColors.onPrimary, fontWeight: FontWeight.w800)),
-                  ),
-                  const SizedBox(width: 8),
-                  const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('VIEGUARD', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: AppColors.textPrimary)),
-                      Text('Beranda', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-                    ],
-                  ),
-                ],
-              ),
-              actions: [
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.notifications_outlined),
-                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotifikasiScreen())),
-                    ),
-                    if (notificationProvider.unreadCount > 0)
-                      Positioned(
-                        right: 8,
-                        top: 8,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-                          decoration: const BoxDecoration(color: AppColors.danger, shape: BoxShape.circle),
-                          alignment: Alignment.center,
-                          child: Text('${notificationProvider.unreadCount}', style: const TextStyle(color: AppColors.onPrimary, fontSize: 9, fontWeight: FontWeight.w700)),
-                        ),
-                      ),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(right: 16, left: 4),
-                  child: TapScale(
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AkunScreen())),
-                    child: CircleAvatar(
-                      radius: 16,
-                      backgroundColor: AppColors.primary,
-                      child: Text(
-                        (admin?.name.isNotEmpty == true ? admin!.name[0] : 'A').toUpperCase(),
-                        style: const TextStyle(color: AppColors.onPrimary, fontSize: 13, fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              title: const VgTopBar(subtitle: 'Beranda'),
             ),
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+              padding: const EdgeInsets.fromLTRB(16, 6, 16, 120),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   _WelcomeBanner(adminName: admin?.name ?? 'Admin'),
-                  const SizedBox(height: 20),
-                  const SectionHeader(title: 'Ringkasan Hari Ini'),
-                  const SizedBox(height: 10),
-                  _RingkasanGrid(orderProvider: orderProvider),
-                  const SizedBox(height: 24),
-                  const SectionHeader(title: 'Kelola Barang'),
-                  const SizedBox(height: 10),
-                  _KelolaBarangGrid(pendingPayments: paymentProvider.payments.length),
-                  const SizedBox(height: 24),
-                  SectionHeader(
-                    title: 'Jadwal Sewa Hari Ini',
-                    actionLabel: 'Lihat Semua',
-                    onAction: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PenyewaanListScreen())),
+                  const SizedBox(height: 26),
+                  VgSectionHeader(
+                    title: 'Ringkasan Hari Ini',
+                    trailing: _lastUpdated == null
+                        ? null
+                        : Row(mainAxisSize: MainAxisSize.min, children: [
+                            Container(width: 7, height: 7, decoration: const BoxDecoration(color: AppColors.success, shape: BoxShape.circle)),
+                            const SizedBox(width: 5),
+                            Text('Update ${DateFormat('HH:mm').format(_lastUpdated!)}', style: const TextStyle(fontSize: 12, color: AppColors.success, fontWeight: FontWeight.w600)),
+                          ]),
                   ),
-                  const SizedBox(height: 10),
-                  if (todaySchedule.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      child: Text('Tidak ada jadwal ambil/kembali hari ini.', style: TextStyle(color: AppColors.textSecondary, fontSize: 12.5)),
-                    )
-                  else
-                    ...todaySchedule.map((o) => _JadwalTile(order: o)),
-                  const SizedBox(height: 24),
-                  SectionHeader(
-                    title: 'Pesanan Terbaru',
-                    trailingBadge: TagChip(label: '${orderProvider.perluTindakanCount} Perlu Tindakan', color: AppColors.warning, background: AppColors.warningBg),
-                    actionLabel: 'Semua',
-                    onAction: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PesananListScreen())),
+                  _Ringkasan(
+                    pesananBaru: orders.perluTindakanCount,
+                    kostumDisewa: rentedUnits,
+                    modelDisewa: activeModels,
+                    progres: orders.progresProduksiRata,
+                    omset: orders.omsetTotal,
+                    onPesanan: () => _push(const PesananListScreen()),
+                    onSewa: () => _push(const PenyewaanListScreen()),
                   ),
-                  const SizedBox(height: 10),
-                  if (orderProvider.isLoading && orderProvider.orders.isEmpty)
-                    const Padding(padding: EdgeInsets.symmetric(vertical: 24), child: Center(child: CircularProgressIndicator()))
-                  else if (orderProvider.errorMessage != null && orderProvider.orders.isEmpty)
-                    _ErrorNotice(message: orderProvider.errorMessage!, onRetry: _refresh)
-                  else if (orderProvider.orders.isEmpty)
-                    const Padding(padding: EdgeInsets.symmetric(vertical: 24), child: Text('Belum ada pesanan.', style: TextStyle(color: AppColors.textSecondary)))
-                  else
-                    ...orderProvider.pesananTerbaru.map(
-                      (o) => PesananOrderCard(
-                        order: o,
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DetailPesananScreen(orderId: o.id))),
+                  const SizedBox(height: 26),
+                  const VgSectionHeader(title: 'Kelola Barang'),
+                  Row(children: [
+                    Expanded(
+                      child: _KelolaTile(
+                        icon: Icons.checkroom_rounded,
+                        title: 'Kelola Barang',
+                        subtitle: '${products.products.length} Item',
+                        onTap: () => _push(const Scaffold(backgroundColor: AppColors.background, appBar: VgBackBar(title: 'Manajemen Stok'), body: StokListScreen())),
                       ),
                     ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _KelolaTile(
+                        icon: Icons.event_available_rounded,
+                        title: 'Kelola Sewaan',
+                        subtitle: '$bookedRentals Aktif',
+                        onTap: () => _push(const PenyewaanListScreen()),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _KelolaTile(
+                        icon: Icons.add_circle_outline_rounded,
+                        title: 'Tambah Barang',
+                        subtitle: 'Baru / Custom',
+                        highlighted: true,
+                        onTap: () => _push(const ProductFormScreen()),
+                      ),
+                    ),
+                  ]),
+                  const SizedBox(height: 26),
+                  VgSectionHeader(
+                    title: 'Jadwal Rental Hari Ini',
+                    icon: Icons.calendar_month_rounded,
+                    actionLabel: 'Lihat Semua',
+                    onAction: () => _push(const PenyewaanListScreen()),
+                  ),
+                  if (schedule.isEmpty)
+                    const VgCard(
+                      padding: EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+                      child: Text('Tidak ada jadwal pengambilan atau pengembalian hari ini.', style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
+                    )
+                  else
+                    ...schedule.map((o) => _JadwalTile(order: o, today: today)),
+                  const SizedBox(height: 16),
+                  VgSectionHeader(
+                    title: 'Pesanan Terbaru',
+                    badge: orders.perluTindakanCount > 0
+                        ? VgPill(label: '${orders.perluTindakanCount} Perlu Tindakan', color: AppColors.warning, background: AppColors.warningBg, fontSize: 10.5)
+                        : null,
+                    actionLabel: 'Semua',
+                    onAction: () => _push(const PesananListScreen()),
+                  ),
+                  if (orders.isLoading && orders.orders.isEmpty)
+                    const Padding(padding: EdgeInsets.symmetric(vertical: 24), child: Center(child: CircularProgressIndicator()))
+                  else if (orders.errorMessage != null && orders.orders.isEmpty)
+                    VgCard(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text(orders.errorMessage!, style: const TextStyle(color: AppColors.danger, fontSize: 12.5)),
+                        const SizedBox(height: 10),
+                        VgButton(label: 'Coba Lagi', icon: Icons.refresh, style: VgButtonStyle.soft, onPressed: _refresh, height: 42),
+                      ]),
+                    )
+                  else if (orders.orders.isEmpty)
+                    const VgCard(child: Text('Belum ada pesanan.', style: TextStyle(color: AppColors.textSecondary)))
+                  else
+                    ...orders.pesananTerbaru.map((o) => _RecentOrderCard(order: o, onTap: () => _push(DetailPesananScreen(orderId: o.id)))),
                 ]),
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _ErrorNotice extends StatelessWidget {
-  final String message;
-  final Future<void> Function() onRetry;
-  const _ErrorNotice({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: AppColors.warningBg, borderRadius: BorderRadius.circular(22)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(children: [
-            const Icon(Icons.wifi_off, color: AppColors.warning, size: 18),
-            const SizedBox(width: 8),
-            const Expanded(child: Text('Gagal memuat data dari server', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13))),
-          ]),
-          const SizedBox(height: 4),
-          Text(message, style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary)),
-          const SizedBox(height: 8),
-          TextButton(onPressed: onRetry, child: const Text('Coba Lagi')),
-        ],
       ),
     );
   }
@@ -230,181 +194,156 @@ class _WelcomeBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(18),
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
         gradient: AppColors.maroonGradient,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: AppColors.border),
-        boxShadow: [BoxShadow(color: AppColors.maroon.withValues(alpha: 0.45), blurRadius: 24, offset: const Offset(0, 10))],
+        boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 8))],
       ),
-      child: Stack(
-        children: [
-          Positioned(
-            right: -40,
-            top: -40,
-            child: Container(
-              width: 140,
-              height: 140,
-              decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.primary.withValues(alpha: 0.08)),
+      child: Stack(children: [
+        Positioned(
+          right: -50,
+          top: -60,
+          child: Container(
+            width: 190,
+            height: 190,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(colors: [Colors.white.withValues(alpha: 0.14), Colors.white.withValues(alpha: 0)]),
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.14), borderRadius: BorderRadius.circular(20)),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  const Icon(Icons.calendar_today, size: 12, color: AppColors.primary),
-                  const SizedBox(width: 6),
-                  Text(Formatters.dayDate(DateTime.now()), style: const TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.w600)),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.goldLight.withValues(alpha: 0.8))),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                const Icon(Icons.calendar_today_rounded, size: 12, color: AppColors.goldLight),
+                const SizedBox(width: 6),
+                Text(DateFormat('EEEE, dd MMM yyyy', 'id_ID').format(DateTime.now()), style: const TextStyle(fontSize: 11.5, color: AppColors.goldLight, fontWeight: FontWeight.w600)),
+              ]),
+            ),
+            const SizedBox(height: 12),
+            Text('Selamat Datang, $adminName', style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w800, color: AppColors.goldLight, height: 1.25)),
+            const SizedBox(height: 6),
+            const Text('Pantau konveksi seragam & rental kostum hari ini.', style: TextStyle(fontSize: 13, color: AppColors.onPrimaryMuted, height: 1.4)),
+          ]),
+        ),
+      ]),
+    );
+  }
+}
+
+class _Ringkasan extends StatelessWidget {
+  final int pesananBaru;
+  final int kostumDisewa;
+  final int modelDisewa;
+  final double progres;
+  final double omset;
+  final VoidCallback onPesanan;
+  final VoidCallback onSewa;
+
+  const _Ringkasan({
+    required this.pesananBaru,
+    required this.kostumDisewa,
+    required this.modelDisewa,
+    required this.progres,
+    required this.omset,
+    required this.onPesanan,
+    required this.onSewa,
+  });
+
+  static BoxDecoration get _box => BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.border),
+        boxShadow: AppColors.cardShadow,
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final percent = (progres * 100).round();
+    return IntrinsicHeight(
+      child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Expanded(
+          flex: 9,
+          child: TapScale(
+            onTap: onPesanan,
+            child: Container(
+              padding: const EdgeInsets.all(14),
+              decoration: _box,
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                const Row(children: [
+                  Expanded(child: Text('Pesanan Baru', style: TextStyle(fontSize: 13, color: AppColors.textSecondary))),
+                  VgIconBadge(icon: Icons.receipt_long_rounded, size: 28, color: AppColors.info, background: AppColors.infoBg, circle: true),
+                ]),
+                const Spacer(),
+                Text('$pesananBaru', style: const TextStyle(fontSize: 46, fontWeight: FontWeight.w800, color: AppColors.primary, height: 1)),
+                const SizedBox(height: 8),
+                const Text('Pesanan saat ini', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              ]),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          flex: 13,
+          child: Column(children: [
+            TapScale(
+              onTap: onSewa,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
+                decoration: _box,
+                child: Row(children: [
+                  Expanded(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      const Text('Kostum Disewa', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      const SizedBox(height: 2),
+                      Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
+                        Text('$kostumDisewa', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.primary)),
+                        const SizedBox(width: 6),
+                        Container(width: 5, height: 5, decoration: const BoxDecoration(color: AppColors.info, shape: BoxShape.circle)),
+                        const SizedBox(width: 4),
+                        Flexible(child: Text('$modelDisewa Model saat ini', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary))),
+                      ]),
+                    ]),
+                  ),
+                  const VgIconBadge(icon: Icons.checkroom_rounded, size: 30, color: AppColors.info, background: AppColors.infoBg, circle: true),
                 ]),
               ),
-              const SizedBox(height: 14),
-              Text('Selamat Datang,', style: GoogleFonts.greatVibes(fontSize: 26, color: AppColors.primary)),
-              Text(adminName, style: GoogleFonts.playfairDisplay(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-              const SizedBox(height: 6),
-              const Text('Pantau konveksi seragam & rental kostum hari ini.', style: TextStyle(color: AppColors.textSecondary, fontSize: 12.5)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _RingkasanGrid extends StatelessWidget {
-  final OrderProvider orderProvider;
-  const _RingkasanGrid({required this.orderProvider});
-
-  @override
-  Widget build(BuildContext context) {
-    return IntrinsicHeight(
-      child: Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Expanded(
-          child: _StatCard(icon: Icons.assignment_outlined, label: 'Pesanan Baru', value: '${orderProvider.countByStatus(OrderStatus.pending)}', caption: 'Menunggu konfirmasi'),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(22), border: Border.all(color: AppColors.border)),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                  const Text('Sedang Disewa', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                  const Icon(Icons.checkroom, size: 18, color: AppColors.primary),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+              decoration: _box,
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Row(children: [
+                  const Expanded(child: Text('Progres Produksi', style: TextStyle(fontSize: 12, color: AppColors.textSecondary))),
+                  Text('$percent%', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.primary)),
                 ]),
-                const SizedBox(height: 4),
-                Text('${orderProvider.countByType(OrderType.sewa)}', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                const Text('Total pesanan sewa', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                 const SizedBox(height: 10),
-                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                  const Text('Progres Produksi', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-                  Text('${(orderProvider.progresProduksiRata * 100).round()}%', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.info)),
-                ]),
-                const SizedBox(height: 4),
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: LinearProgressIndicator(value: orderProvider.progresProduksiRata, minHeight: 6, backgroundColor: AppColors.border, valueColor: const AlwaysStoppedAnimation(AppColors.info)),
+                  borderRadius: BorderRadius.circular(6),
+                  child: LinearProgressIndicator(value: progres.clamp(0, 1), minHeight: 7, backgroundColor: AppColors.beige, color: AppColors.gold),
                 ),
-                const SizedBox(height: 10),
-                const Text('Omset Aktif', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-                Text(Formatters.rupiahCompact(orderProvider.omsetTotal), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: AppColors.textPrimary)),
-              ],
+              ]),
             ),
-          ),
-        ),
-      ],
-      ),
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final String caption;
-
-  const _StatCard({required this.icon, required this.label, required this.value, required this.caption});
-
-  @override
-  Widget build(BuildContext context) {
-    final needsAction = int.tryParse(value) != null && int.parse(value) > 0;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(22), border: Border.all(color: AppColors.border)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            Flexible(child: Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary))),
-            Icon(icon, size: 18, color: AppColors.primary),
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+              decoration: _box,
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                const Text('Omset Berjalan', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                const SizedBox(height: 2),
+                Text(Formatters.rupiahCompact(omset), style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+              ]),
+            ),
           ]),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(value, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-              Text(caption, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-            ],
-          ),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(color: needsAction ? AppColors.warningBg : AppColors.successBg, borderRadius: BorderRadius.circular(8)),
-            child: Text(
-              needsAction ? 'Perlu ditindaklanjuti' : 'Semua sudah ditangani',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: needsAction ? AppColors.warning : AppColors.success),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _KelolaBarangGrid extends StatelessWidget {
-  final int pendingPayments;
-  const _KelolaBarangGrid({required this.pendingPayments});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _KelolaTile(
-            icon: Icons.fact_check_outlined,
-            title: 'Verifikasi\nPembayaran',
-            badge: pendingPayments > 0 ? '$pendingPayments' : null,
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PaymentVerificationListScreen())),
-          ),
         ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _KelolaTile(
-            icon: Icons.key_outlined,
-            title: 'Penyewaan\nAktif',
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PenyewaanListScreen())),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _KelolaTile(
-            icon: Icons.receipt_long_outlined,
-            title: 'Semua\nPesanan',
-            highlighted: true,
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PesananListScreen())),
-          ),
-        ),
-      ],
+      ]),
     );
   }
 }
@@ -412,46 +351,40 @@ class _KelolaBarangGrid extends StatelessWidget {
 class _KelolaTile extends StatelessWidget {
   final IconData icon;
   final String title;
-  final String? badge;
+  final String subtitle;
   final bool highlighted;
   final VoidCallback onTap;
 
-  const _KelolaTile({required this.icon, required this.title, this.badge, this.highlighted = false, required this.onTap});
+  const _KelolaTile({required this.icon, required this.title, required this.subtitle, this.highlighted = false, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return TapScale(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        height: 104,
+        padding: const EdgeInsets.symmetric(horizontal: 6),
         decoration: BoxDecoration(
-          color: highlighted ? AppColors.primary : AppColors.surface,
-          borderRadius: BorderRadius.circular(20),
+          color: highlighted ? null : AppColors.surface,
+          gradient: highlighted ? AppColors.maroonGradient : null,
+          borderRadius: BorderRadius.circular(18),
           border: highlighted ? null : Border.all(color: AppColors.border),
+          boxShadow: AppColors.cardShadow,
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Icon(icon, color: highlighted ? AppColors.onPrimary : AppColors.primary, size: 24),
-                if (badge != null)
-                  Positioned(
-                    right: -6,
-                    top: -6,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                      decoration: const BoxDecoration(color: AppColors.danger, shape: BoxShape.circle),
-                      child: Text(badge!, style: const TextStyle(color: AppColors.onPrimary, fontSize: 9, fontWeight: FontWeight.w700)),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(title, textAlign: TextAlign.center, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: highlighted ? AppColors.onPrimary : AppColors.textPrimary)),
-          ],
-        ),
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          highlighted
+              ? Container(
+                  width: 40,
+                  height: 40,
+                  decoration: const BoxDecoration(color: AppColors.gold, shape: BoxShape.circle),
+                  child: Icon(icon, color: AppColors.primary, size: 24),
+                )
+              : VgIconBadge(icon: icon, size: 40, background: AppColors.beigeSoft, circle: true),
+          const SizedBox(height: 10),
+          Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: highlighted ? AppColors.goldLight : AppColors.textPrimary)),
+          const SizedBox(height: 2),
+          Text(subtitle, style: TextStyle(fontSize: 11, color: highlighted ? AppColors.onPrimaryMuted : AppColors.textSecondary)),
+        ]),
       ),
     );
   }
@@ -459,36 +392,113 @@ class _KelolaTile extends StatelessWidget {
 
 class _JadwalTile extends StatelessWidget {
   final Order order;
-  const _JadwalTile({required this.order});
+  final DateTime today;
+  const _JadwalTile({required this.order, required this.today});
 
   @override
   Widget build(BuildContext context) {
     final rental = order.rental!;
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final isPickupToday = DateTime(rental.pickupDate.year, rental.pickupDate.month, rental.pickupDate.day) == today;
-    final label = isPickupToday ? 'Pengambilan' : 'Pengembalian';
+    final pickup = DateTime(rental.pickupDate.year, rental.pickupDate.month, rental.pickupDate.day);
+    final isPickup = pickup == today;
+    final label = isPickup ? 'Pengambilan' : 'Pengembalian';
+    final date = isPickup ? rental.pickupDate : rental.returnDate;
+
+    String chip;
+    Color fg;
+    Color bg;
+    if (rental.status == RentalStatus.dikembalikan) {
+      chip = 'Pengecekan';
+      fg = AppColors.warning;
+      bg = AppColors.warningBg;
+    } else if (isPickup) {
+      chip = 'Siap Ambil';
+      fg = AppColors.success;
+      bg = AppColors.successBg;
+    } else {
+      chip = 'Pengembalian';
+      fg = AppColors.primary;
+      bg = AppColors.dangerBg;
+    }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.border)),
-      child: Row(
-        children: [
-          Icon(isPickupToday ? Icons.outbound : Icons.assignment_return_outlined, size: 18, color: AppColors.info),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(order.customer.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                Text('$label · #${order.orderNumber}', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-              ],
-            ),
-          ),
-          RentalStatusBadge(status: rental.status),
-        ],
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.fromLTRB(4, 8, 10, 8),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
+        boxShadow: AppColors.cardShadow,
       ),
+      child: Row(children: [
+        SizedBox(
+          width: 62,
+          child: Column(children: [
+            Text(DateFormat('dd').format(date), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.primary)),
+            Text(DateFormat('MMM', 'id_ID').format(date).toUpperCase(), style: const TextStyle(fontSize: 10, color: AppColors.textSecondary)),
+          ]),
+        ),
+        Container(width: 1, height: 32, color: AppColors.border),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(order.customer.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+            const SizedBox(height: 2),
+            Text('$label • ${order.totalQuantity} ${order.headline}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary)),
+          ]),
+        ),
+        const SizedBox(width: 8),
+        VgPill(label: chip, color: fg, background: bg, padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6)),
+      ]),
+    );
+  }
+}
+
+class _RecentOrderCard extends StatelessWidget {
+  final Order order;
+  final VoidCallback onTap;
+  const _RecentOrderCard({required this.order, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final pending = order.status == OrderStatus.pending;
+    return VgCard(
+      onTap: onTap,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Expanded(child: Text('#${order.orderNumber}', style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary))),
+          OrderStatusPill(order: order),
+        ]),
+        const SizedBox(height: 12),
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          VgThumb(url: order.coverImage, size: 64, radius: 10),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Wrap(crossAxisAlignment: WrapCrossAlignment.center, spacing: 8, runSpacing: 4, children: [
+                Text(order.customer.name, style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800, color: AppColors.primary)),
+                VgPill(label: order.orderType.label, color: AppColors.info, background: AppColors.infoBg, fontSize: 10, padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3)),
+              ]),
+              const SizedBox(height: 4),
+              Text('${order.headline} (${order.totalQuantity} Stel)', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, color: AppColors.textPrimary)),
+              const SizedBox(height: 4),
+              Text(
+                order.needsQuote ? 'Belum Ditentukan' : Formatters.rupiah(order.totalPrice),
+                style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.primary),
+              ),
+            ]),
+          ),
+        ]),
+        const SizedBox(height: 14),
+        VgButton(
+          label: pending ? 'Lihat Detail & Konfirmasi' : 'Lihat Detail',
+          icon: pending ? Icons.arrow_forward_rounded : null,
+          trailingIcon: true,
+          style: pending ? VgButtonStyle.gold : VgButtonStyle.outline,
+          expanded: true,
+          height: 44,
+          onPressed: onTap,
+        ),
+      ]),
     );
   }
 }

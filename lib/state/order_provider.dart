@@ -1,7 +1,10 @@
 import 'package:flutter/foundation.dart';
+import 'package:dio/dio.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../core/api/api_client.dart';
 import '../core/api/api_exception.dart';
+import '../models/operations_models.dart';
 import '../models/order_model.dart';
 import '../models/order_status.dart';
 
@@ -111,6 +114,23 @@ class OrderProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> submitQuote(String id, {required double totalPrice, double? dpAmount, DateTime? deadlineDate, String? note}) async {
+    try {
+      await apiClient.patch('/orders/$id/quote', data: {
+        'totalPrice': totalPrice,
+        'dpAmount': dpAmount,
+        if (deadlineDate != null) 'deadlineDate': deadlineDate.toIso8601String().substring(0, 10),
+        'note': ?note,
+      });
+      await fetchOrderDetail(id);
+      return true;
+    } on ApiException catch (e) {
+      errorMessage = e.message;
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<bool> updateProgress(String id, {required int progressPercentage, required String statusLabel, String? note}) async {
     try {
       await apiClient.patch('/orders/$id/progress', data: {
@@ -141,4 +161,39 @@ class OrderProvider extends ChangeNotifier {
       return false;
     }
   }
+
+  Future<bool> _run(String id, Future<void> Function() action) async {
+    try {
+      await action();
+      await fetchOrderDetail(id);
+      return true;
+    } on ApiException catch (e) {
+      errorMessage = e.message;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> saveSizeEntries(String id, List<SizeEntry> entries) =>
+      _run(id, () => apiClient.put('/orders/$id/sizes', data: {'entries': entries.map((e) => e.toJson()).toList()}));
+
+  Future<bool> shipOrder(String id, {required String courier, String? trackingNumber, double? shippingCost, DateTime? etaDate}) => _run(
+        id,
+        () => apiClient.patch('/orders/$id/ship', data: {
+          'courier': courier,
+          if (trackingNumber != null && trackingNumber.isNotEmpty) 'trackingNumber': trackingNumber,
+          'shippingCost': ?shippingCost,
+          if (etaDate != null) 'etaDate': etaDate.toIso8601String().substring(0, 10),
+        }),
+      );
+
+  Future<bool> uploadPhotos(String id, {required String category, String? title, bool isPublic = true, required List<XFile> files}) => _run(id, () async {
+        final form = FormData.fromMap({'category': category, if (title != null && title.isNotEmpty) 'title': title, 'isPublic': isPublic.toString()});
+        for (final file in files) {
+          form.files.add(MapEntry('orderPhotos', ApiClient.imageFile(await file.readAsBytes(), file.name)));
+        }
+        await apiClient.postForm('/orders/$id/photos', form);
+      });
+
+  Future<bool> deletePhoto(String orderId, String photoId) => _run(orderId, () => apiClient.delete('/orders/photos/$photoId'));
 }

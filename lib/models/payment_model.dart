@@ -1,3 +1,4 @@
+import '../core/api/api_config.dart';
 import '../core/utils/parsing.dart';
 import 'order_status.dart';
 
@@ -44,7 +45,7 @@ class Payment {
       paymentType: json['paymentType'] as String,
       amount: parseDecimal(json['amount']),
       paymentMethod: json['paymentMethod'] as String?,
-      proofImage: json['proofImage'] as String?,
+      proofImage: resolveMediaUrl(json['proofImage'] as String?, ApiConfig.origin),
       refundReason: json['refundReason'] as String?,
       status: paymentStatusFromApi(json['status'] as String),
       verifierName: verifier?['name'] as String?,
